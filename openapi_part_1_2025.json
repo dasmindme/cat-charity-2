@@ -1,0 +1,658 @@
+ {
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Благотворительный фонд поддержки котиков QRKot",
+    "description": "Сервис для поддержки котиков",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/charity_project/": {
+      "get": {
+        "tags": [
+          "charity_projects"
+        ],
+        "summary": "Get All Charity Projects",
+        "description": "Показать список всех целевых проектов.",
+        "operationId": "get_all_charity_projects_charity_project__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CharityProjectDB"
+                  },
+                  "type": "array",
+                  "title": "Response Get All Charity Projects Charity Project  Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "charity_projects"
+        ],
+        "summary": "Create Charity Project",
+        "description": "Создать целевой проект.",
+        "operationId": "create_charity_project_charity_project__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CharityProjectCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharityProjectDB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Not unique name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "examples": {
+                  "notUniqueName": {
+                    "summary": "Not unique name",
+                    "value": {
+                      "detail": "Проект с таким именем уже существует!"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/charity_project/{project_id}": {
+      "patch": {
+        "tags": [
+          "charity_projects"
+        ],
+        "summary": "Update Charity Project",
+        "description": "Редактировать целевой проект.\n\nЗакрытый проект нельзя редактировать;\nнельзя установить требуемую сумму меньше уже вложенной.",
+        "operationId": "update_charity_project_charity_project__project_id__patch",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CharityProjectUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharityProjectDB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid operations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "examples": {
+                  "fullAmountTooLow": {
+                    "summary": "Full amount lower than invested amount",
+                    "value": {
+                      "detail": "Нелья установить значение full_amount меньше уже вложенной суммы."
+                    }
+                  },
+                  "notUniqueName": {
+                    "summary": "Not unique name",
+                    "value": {
+                      "detail": "Проект с таким именем уже существует!"
+                    }
+                  },
+                  "projectClosed": {
+                    "summary": "Project closed",
+                    "value": {
+                      "detail": "Закрытый проект нельзя редактировать!"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "charity_projects"
+        ],
+        "summary": "Delete Charity Project",
+        "description": "Удалить целевой проект.\n\nНельзя удалить проект, в который уже были инвестированы средства.",
+        "operationId": "delete_charity_project_charity_project__project_id__delete",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharityProjectDB"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Нельзя удалять закрытый проект или проект, в который уже были инвестированы средства.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "examples": {
+                  "projectClosed": {
+                    "summary": "Project closed",
+                    "value": {
+                      "detail": "В проект были внесены средства, не подлежит удалению!"
+                    }
+                  },
+                  "projectWithDonations": {
+                    "summary": "Project with donations",
+                    "value": {
+                      "detail": "В проект были внесены средства, не подлежит удалению!"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The project does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/donation/": {
+      "get": {
+        "tags": [
+          "donations"
+        ],
+        "summary": "Get All Donations",
+        "description": "Показать список всех пожертвований.",
+        "operationId": "get_all_donations_donation__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DonationFullInfoDB"
+                  },
+                  "type": "array",
+                  "title": "Response Get All Donations Donation  Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "donations"
+        ],
+        "summary": "Create Donation",
+        "description": "Создать пожертвование.",
+        "operationId": "create_donation_donation__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DonationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DonationDB"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CharityProjectCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 5,
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10,
+            "title": "Description"
+          },
+          "full_amount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "title": "Full Amount"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "full_amount"
+        ],
+        "title": "CharityProjectCreate"
+      },
+      "CharityProjectDB": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 5,
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10,
+            "title": "Description"
+          },
+          "full_amount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "title": "Full Amount"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "invested_amount": {
+            "type": "integer",
+            "title": "Invested Amount"
+          },
+          "fully_invested": {
+            "type": "boolean",
+            "title": "Fully Invested"
+          },
+          "create_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Create Date"
+          },
+          "close_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Close Date"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "full_amount",
+          "id",
+          "invested_amount",
+          "fully_invested",
+          "create_date"
+        ],
+        "title": "CharityProjectDB"
+      },
+      "CharityProjectUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 10
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "full_amount": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Amount"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CharityProjectUpdate"
+      },
+      "DonationCreate": {
+        "properties": {
+          "full_amount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "title": "Full Amount"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "full_amount"
+        ],
+        "title": "DonationCreate"
+      },
+      "DonationDB": {
+        "properties": {
+          "full_amount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "title": "Full Amount"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "create_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Create Date"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "full_amount",
+          "id",
+          "create_date"
+        ],
+        "title": "DonationDB"
+      },
+      "DonationFullInfoDB": {
+        "properties": {
+          "full_amount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "title": "Full Amount"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "create_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Create Date"
+          },
+          "invested_amount": {
+            "type": "integer",
+            "title": "Invested Amount"
+          },
+          "fully_invested": {
+            "type": "boolean",
+            "title": "Fully Invested"
+          },
+          "close_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Close Date"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "full_amount",
+          "id",
+          "create_date",
+          "invested_amount",
+          "fully_invested"
+        ],
+        "title": "DonationFullInfoDB"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
